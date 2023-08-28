@@ -57,7 +57,7 @@ export class AppInstanceFactory {
 
     for (const table of tables) {
       await this.dataSource.manager.connection.query(
-        `DELETE FROM ${table} CASCADE;`,
+        `TRUNCATE ${table} RESTART IDENTITY CASCADE;`,
       );
     }
   }

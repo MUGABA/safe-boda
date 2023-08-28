@@ -9,7 +9,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
-        url: configService.get<string>('DB_URI'),
+        url:
+          process.env.NODE_ENV === 'test'
+            ? configService.get<string>('DB_URI_TEST')
+            : configService.get<string>('DB_URI'),
         autoLoadEntities: true,
         synchronize: true,
         logging: false,

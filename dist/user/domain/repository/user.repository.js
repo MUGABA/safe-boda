@@ -71,7 +71,7 @@ let UsersRepository = exports.UsersRepository = class UsersRepository {
     async userDriverDetails(userId) {
         return await this.driverRequestRepository.find({
             where: { driver: { id: userId } },
-            relations: { request: { customer: true } },
+            relations: { request: { customer: true }, driver: true },
         });
     }
 };

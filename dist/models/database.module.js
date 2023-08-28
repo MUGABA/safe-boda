@@ -20,7 +20,9 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                 inject: [config_1.ConfigService],
                 useFactory: async (configService) => ({
                     type: 'postgres',
-                    url: configService.get('DB_URI'),
+                    url: process.env.NODE_ENV === 'test'
+                        ? configService.get('DB_URI_TEST')
+                        : configService.get('DB_URI'),
                     autoLoadEntities: true,
                     synchronize: true,
                     logging: false,

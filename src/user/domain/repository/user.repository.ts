@@ -72,7 +72,7 @@ export class UsersRepository implements IUserRepository {
   async userDriverDetails(userId: number): Promise<DriverRequests[]> {
     return await this.driverRequestRepository.find({
       where: { driver: { id: userId } },
-      relations: { request: { customer: true } },
+      relations: { request: { customer: true }, driver: true },
     });
   }
 }

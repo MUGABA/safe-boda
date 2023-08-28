@@ -51,7 +51,12 @@ let RequestService = exports.RequestService = class RequestService {
             }
             const driverRequestDto = new driverRequest_dto_1.DriverRequestDto();
             const request = await this.requestRepository.findOne(requestId);
-            console.log(request);
+            if (request === null) {
+                throw new common_1.NotFoundException({
+                    status: 404,
+                    message: 'Wrong request challenges',
+                });
+            }
             if (request.status !== 'pending') {
                 throw new common_1.BadRequestException({
                     status: 400,

@@ -38,7 +38,7 @@ class AppInstanceFactory {
     async cleanupDB() {
         const tables = this.dataSource.manager.connection.entityMetadatas.map((entity) => `${entity.tableName}`);
         for (const table of tables) {
-            await this.dataSource.manager.connection.query(`DELETE FROM ${table} CASCADE;`);
+            await this.dataSource.manager.connection.query(`TRUNCATE ${table} RESTART IDENTITY CASCADE;`);
         }
     }
 }

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { ActiveUserData } from '@absolute/helpers/activeUserData';
 import { Requests } from '@absolute/models/request.entity';
@@ -60,7 +64,12 @@ export class RequestService implements IRequestService {
       const driverRequestDto = new DriverRequestDto();
 
       const request = await this.requestRepository.findOne(requestId);
-      console.log(request);
+      if (request === null) {
+        throw new NotFoundException({
+          status: 404,
+          message: 'Wrong request challenges',
+        });
+      }
 
       if (request.status !== 'pending') {
         throw new BadRequestException({
