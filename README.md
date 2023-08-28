@@ -1,7 +1,7 @@
 ## Installation
 
 ```bash
-  nvm install this installs the node version the application is using.
+ $ nvm install
 $ yarn install
 ```
 
