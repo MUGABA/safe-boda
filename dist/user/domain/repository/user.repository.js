@@ -15,11 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersRepository = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const request_riders_entity_1 = require("../../../models/request_riders.entity");
 const user_entity_1 = require("../../../models/user.entity");
 const typeorm_2 = require("typeorm");
 let UsersRepository = exports.UsersRepository = class UsersRepository {
-    constructor(userRepository) {
+    constructor(userRepository, driverRequestRepository) {
         this.userRepository = userRepository;
+        this.driverRequestRepository = driverRequestRepository;
     }
     async create(user) {
         return await this.userRepository.save(user);
@@ -50,10 +52,34 @@ let UsersRepository = exports.UsersRepository = class UsersRepository {
             where: { email },
         });
     }
+    async userCustomerDetails(userId) {
+        return await this.userRepository.findOne({
+            where: { id: userId },
+            relations: { requests: true },
+            select: {
+                requests: {
+                    pickUpLocation: true,
+                    destinationLocation: true,
+                    status: true,
+                    driverRequest: {
+                        driver: { name: true, email: true, phoneNumber: true },
+                    },
+                },
+            },
+        });
+    }
+    async userDriverDetails(userId) {
+        return await this.driverRequestRepository.find({
+            where: { driver: { id: userId } },
+            relations: { request: { customer: true } },
+        });
+    }
 };
 exports.UsersRepository = UsersRepository = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(request_riders_entity_1.DriverRequests)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], UsersRepository);
 //# sourceMappingURL=user.repository.js.map

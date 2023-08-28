@@ -5,6 +5,7 @@ import { SignUpDto } from '../dtos/sign-up.dto';
 import { PasswordService } from './password.service';
 import jwtConfig from '@absolute/config/jwt.config';
 import { AuthResponse } from '@absolute/helpers/authResponse';
+import { DriverRequests } from '@absolute/models/request_riders.entity';
 import { UsersRepository } from '@absolute/user/domain/repository/user.repository';
 import { User } from 'src/models/user.entity';
 import { SignInDto } from '../dtos/sign-in.dto';
@@ -20,4 +21,5 @@ export declare class AuthService {
     generateAccessToken(user: Partial<User>): Promise<{
         accessToken: string;
     }>;
+    getMyProfile(currentUser: ActiveUserData): Promise<User | DriverRequests[]>;
 }

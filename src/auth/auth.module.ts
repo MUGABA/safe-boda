@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import jwtConfig from '@absolute/config/jwt.config';
+import { DriverRequests } from '@absolute/models/request_riders.entity';
 import { User } from '@absolute/models/user.entity';
 import { UsersRepository } from '@absolute/user/domain/repository/user.repository';
 import { AuthController } from './auth.controller';
@@ -11,7 +12,7 @@ import { PasswordService } from './services/password.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, DriverRequests]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   controllers: [AuthController],

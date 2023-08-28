@@ -33,6 +33,9 @@ let AuthController = exports.AuthController = class AuthController {
     async toggleDriverIsAvailable(req) {
         return await this.authService.toggleDriverAvailable(req.user);
     }
+    async getUSerDetails(req) {
+        return await this.authService.getMyProfile(req.user);
+    }
 };
 __decorate([
     (0, swagger_1.ApiConflictResponse)({
@@ -80,6 +83,18 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "toggleDriverIsAvailable", null);
+__decorate([
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Return current users details',
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getUSerDetails", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('auth'),
     (0, common_1.Controller)('auth'),

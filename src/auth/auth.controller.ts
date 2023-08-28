@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Patch,
@@ -23,6 +24,7 @@ import { AuthService } from './services/auth.service';
 
 import { AuthResponse } from '@absolute/helpers/authResponse';
 import { Public } from '@absolute/helpers/decorators/PublicRoute.decorator';
+import { DriverRequests } from '@absolute/models/request_riders.entity';
 import { User } from 'src/models/user.entity';
 import { SignInDto } from './dtos/sign-in.dto';
 import { DriverGuard } from './guards/driver.guard';
@@ -70,6 +72,16 @@ export class AuthController {
   @Patch('toggle-available')
   async toggleDriverIsAvailable(@Request() req): Promise<User> {
     return await this.authService.toggleDriverAvailable(req.user);
+  }
+
+  @ApiOkResponse({
+    description: 'Return current users details',
+  })
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @Get('me')
+  async getUSerDetails(@Request() req): Promise<User | DriverRequests[]> {
+    return await this.authService.getMyProfile(req.user);
   }
 
   // @ApiUnauthorizedResponse({ description: 'Unauthorized' })

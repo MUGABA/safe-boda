@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const typeorm_1 = require("@nestjs/typeorm");
 const jwt_config_1 = require("../config/jwt.config");
+const request_riders_entity_1 = require("../models/request_riders.entity");
 const user_entity_1 = require("../models/user.entity");
 const user_repository_1 = require("../user/domain/repository/user.repository");
 const auth_controller_1 = require("./auth.controller");
@@ -21,7 +22,7 @@ let AuthModule = exports.AuthModule = class AuthModule {
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, request_riders_entity_1.DriverRequests]),
             jwt_1.JwtModule.registerAsync(jwt_config_1.default.asProvider()),
         ],
         controllers: [auth_controller_1.AuthController],

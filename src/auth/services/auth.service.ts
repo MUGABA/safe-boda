@@ -9,6 +9,7 @@ import { PasswordService } from './password.service';
 
 import jwtConfig from '@absolute/config/jwt.config';
 import { AuthResponse } from '@absolute/helpers/authResponse';
+import { DriverRequests } from '@absolute/models/request_riders.entity';
 import { UsersRepository } from '@absolute/user/domain/repository/user.repository';
 import { User } from 'src/models/user.entity';
 import { SignInDto } from '../dtos/sign-in.dto';
@@ -107,10 +108,6 @@ export class AuthService {
     }
   }
 
-  // async signOut(userId: string): Promise<void> {
-  //   this.redisService.delete(`user-${userId}`);
-  // }
-
   async generateAccessToken(
     user: Partial<User>,
   ): Promise<{ accessToken: string }> {
@@ -131,5 +128,19 @@ export class AuthService {
     );
 
     return { accessToken };
+  }
+
+  async getMyProfile(
+    currentUser: ActiveUserData,
+  ): Promise<User | DriverRequests[]> {
+    try {
+      if (currentUser.userType === 'Customer')
+        return this.userRepository.userCustomerDetails(currentUser.id);
+      else if (currentUser.userType === 'Driver')
+        return this.userRepository.userDriverDetails(currentUser.id);
+      else return this.userRepository.findOne(currentUser.id);
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -104,6 +104,19 @@ let AuthService = exports.AuthService = class AuthService {
         });
         return { accessToken };
     }
+    async getMyProfile(currentUser) {
+        try {
+            if (currentUser.userType === 'Customer')
+                return this.userRepository.userCustomerDetails(currentUser.id);
+            else if (currentUser.userType === 'Driver')
+                return this.userRepository.userDriverDetails(currentUser.id);
+            else
+                return this.userRepository.findOne(currentUser.id);
+        }
+        catch (error) {
+            throw error;
+        }
+    }
 };
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),

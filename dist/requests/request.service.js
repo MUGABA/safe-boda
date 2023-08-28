@@ -51,6 +51,7 @@ let RequestService = exports.RequestService = class RequestService {
             }
             const driverRequestDto = new driverRequest_dto_1.DriverRequestDto();
             const request = await this.requestRepository.findOne(requestId);
+            console.log(request);
             if (request.status !== 'pending') {
                 throw new common_1.BadRequestException({
                     status: 400,

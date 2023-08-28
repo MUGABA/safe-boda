@@ -60,6 +60,7 @@ export class RequestService implements IRequestService {
       const driverRequestDto = new DriverRequestDto();
 
       const request = await this.requestRepository.findOne(requestId);
+      console.log(request);
 
       if (request.status !== 'pending') {
         throw new BadRequestException({
