@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
+import { ActiveUserData } from '@absolute/helpers/activeUserData';
 import { Requests } from '@absolute/models/request.entity';
 import { DriverRequests } from '@absolute/models/request_riders.entity';
 import { UsersRepository } from '@absolute/user/domain/repository/user.repository';
@@ -49,7 +50,7 @@ export class RequestService implements IRequestService {
     try {
       const activeDriverRequest: DriverRequests[] =
         await this.requestRepository.findActiveDriverRequests(driverId);
-      if (activeDriverRequest.length) {
+      if (activeDriverRequest.length >= 1) {
         throw new BadRequestException({
           status: 400,
           message: 'You already have a running customer',
@@ -90,7 +91,7 @@ export class RequestService implements IRequestService {
   async updateDriverRequest(
     driverRequestId: number,
     status: string,
-    userId: number,
+    currentUser: ActiveUserData,
   ): Promise<DriverRequests> {
     {
       try {
@@ -102,8 +103,10 @@ export class RequestService implements IRequestService {
         );
 
         if (
-          driverRequest.driver.id !== userId ||
-          getRequest.customer.id !== userId
+          (currentUser.userType === 'Driver' &&
+            driverRequest.driver.id !== currentUser.id) ||
+          (currentUser.userType === 'Customer' &&
+            getRequest.customer.id !== currentUser.id)
         ) {
           throw new BadRequestException({
             status: 400,
@@ -125,18 +128,5 @@ export class RequestService implements IRequestService {
         throw error;
       }
     }
-  }
-
-  update(id: string, request: Requests): Promise<Requests> {
-    throw new Error('Method not implemented.');
-  }
-  delete(id: string): Promise<Requests> {
-    throw new Error('Method not implemented.');
-  }
-  findAll(): Promise<Requests[]> {
-    throw new Error('Method not implemented.');
-  }
-  findOne(id: string): Promise<Requests> {
-    throw new Error('Method not implemented.');
   }
 }

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RequestInstanceFactory = void 0;
-const request_dto_1 = require("../../requests/dtos/request.dto");
+const request_entity_1 = require("../../models/request.entity");
 class RequestInstanceFactory {
     static new(dataSource) {
         const factory = new RequestInstanceFactory();
@@ -9,7 +9,7 @@ class RequestInstanceFactory {
         return factory;
     }
     async create(request) {
-        const requestRepository = this.dataSource.getRepository(request_dto_1.RequestDto);
+        const requestRepository = this.dataSource.getRepository(request_entity_1.Requests);
         return requestRepository.save(request);
     }
 }

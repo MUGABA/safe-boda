@@ -19,6 +19,7 @@ import {
 import { ActiveUserData } from 'src/helpers/activeUserData';
 
 import { CustomerGuard } from '@absolute/auth/guards/customer.gaurd';
+import { DriverGuard } from '@absolute/auth/guards/driver.guard';
 import { Requests } from '@absolute/models/request.entity';
 import { DriverRequests } from '@absolute/models/request_riders.entity';
 import { RequestDto } from './dtos/request.dto';
@@ -52,6 +53,7 @@ export class RequestController {
     description: 'Returns all pending requests from customers',
   })
   @ApiBearerAuth()
+  @UseGuards(DriverGuard)
   @Get('customer-requests')
   async getAllRidesThatNeedARider(): Promise<Requests[]> {
     return await this.requestService.findByStatus('pending');
@@ -59,6 +61,7 @@ export class RequestController {
 
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBearerAuth()
+  @UseGuards(DriverGuard)
   @Post('take-request/:requestId/')
   async takeOverRequest(
     @Request() req,
@@ -83,16 +86,7 @@ export class RequestController {
     return await this.requestService.updateDriverRequest(
       requestId,
       status,
-      currentUser.id,
+      currentUser,
     );
   }
-
-  // @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  // @ApiOkResponse({ description: 'User has been successfully signed out' })
-  // @ApiBearerAuth()
-  // @HttpCode(HttpStatus.OK)
-  // @Post('sign-out')
-  // signOut(@ActiveUser('id') userId: string): Promise<void> {
-  //   return this.authService.signOut(userId);
-  // }
 }

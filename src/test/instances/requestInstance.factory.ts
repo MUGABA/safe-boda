@@ -1,5 +1,4 @@
 import { Requests } from '@absolute/models/request.entity';
-import { RequestDto } from '@absolute/requests/dtos/request.dto';
 import { DataSource } from 'typeorm';
 
 export class RequestInstanceFactory {
@@ -11,8 +10,8 @@ export class RequestInstanceFactory {
     return factory;
   }
 
-  async create(request: Requests) {
-    const requestRepository = this.dataSource.getRepository(RequestDto);
+  async create(request: Partial<Requests>) {
+    const requestRepository = this.dataSource.getRepository(Requests);
 
     return requestRepository.save(request);
   }

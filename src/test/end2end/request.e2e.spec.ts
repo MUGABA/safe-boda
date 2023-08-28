@@ -3,218 +3,121 @@ import { Server } from 'http';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 
-import { SignInDto } from '@absolute/auth/dtos/sign-in.dto';
-import { SignUpDto } from '@absolute/auth/dtos/sign-up.dto';
 import { AuthService } from '@absolute/auth/services/auth.service';
+import { Requests } from '@absolute/models/request.entity';
+import { RequestDto } from '@absolute/requests/dtos/request.dto';
+import { RequestService } from '@absolute/requests/request.service';
 import { AppInstanceFactory } from '@absolute/test/instances/appInstance.factory';
 import { AuthInstanceFactory } from '../instances/authInstance.factory';
+import { RequestInstanceFactory } from '../instances/requestInstance.factory';
 
-describe('Auth Module End-2-End', () => {
+describe('Module Module End-2-End', () => {
   let app: AppInstanceFactory;
   let server: Server;
   let dataSource: DataSource;
   let authService: AuthService;
+  let requestService: RequestService;
 
   beforeAll(async () => {
     app = await AppInstanceFactory.new();
     server = app.instance.getHttpServer();
     dataSource = app.dbSource;
     authService = app.instance.get(AuthService);
+    requestService = app.instance.get(RequestService);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  beforeEach(async () => {
+  afterEach(async () => {
     await app.cleanupDB();
   });
 
-  describe('AppModule', () => {
-    describe('GET /', () => {
-      it("should return 'Hello World'", () => {
-        return request(app.instance.getHttpServer())
-          .get('/')
-          .expect(HttpStatus.OK)
-          .expect('Hello World!');
-      });
+  let user;
+
+  beforeEach(async () => {
+    user = await AuthInstanceFactory.new(dataSource).create({
+      email: 'user@gmail.com',
+      password: 'Rashid123',
+      name: 'Muhamad Rashid',
+      phoneNumber: '0705939222',
+      isDriverAvailable: false,
+      userType: 'Customer',
     });
   });
 
-  describe('AuthModule', () => {
-    describe('POST /auth/sign-up', () => {
-      it('should create a new user', async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1));
-        const signUpDto: SignUpDto = {
-          email: 'rashid@safeboda.com',
-          password: 'Rashid123',
-          name: 'Muhamad Rashid',
-          phoneNumber: '0705939222',
-          isDriverAvailable: false,
-          userType: 'Driver',
-        };
-        return request(server)
-          .post('/auth/sign-up')
-          .send(signUpDto)
-          .expect(HttpStatus.CREATED);
-      });
-      it('should return 400 for invalid sign up fields', async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1));
-        const signUpDto: SignUpDto = {
-          email: 'invalid-email',
-          password: 'Rashid123',
-          name: 'Muhamad Rashid',
-          phoneNumber: '0705939222',
-          isDriverAvailable: false,
-          userType: 'Driver',
-        };
-        return request(server)
-          .post('/auth/sign-up')
-          .send(signUpDto)
-          .expect(HttpStatus.BAD_REQUEST);
-      });
-      it('should return 409 if user already exists', async () => {
-        await AuthInstanceFactory.new(dataSource).create({
-          email: 'user@gmail.com',
-          password: 'Rashid123',
-          name: 'Muhamad Rashid',
-          phoneNumber: '0705939222',
-          isDriverAvailable: false,
-          userType: 'Driver',
-        });
-        const signUpDto: SignUpDto = {
-          email: 'user@gmail.com',
-          password: 'Rashid123',
-          name: 'Muhamad Rashid',
-          phoneNumber: '0705939222',
-          isDriverAvailable: false,
-          userType: 'Driver',
-        };
-        return request(server)
-          .post('/auth/sign-up')
-          .send(signUpDto)
-          .expect(HttpStatus.BAD_REQUEST);
-      });
-
-      it('should return 400 if user type is not Admin, Driver or Customer', async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1));
-        const signUpDto: SignUpDto = {
-          email: 'user@gmail.com',
-          password: 'Rashid123',
-          name: 'Muhamad Rashid',
-          phoneNumber: '0705939222',
-          isDriverAvailable: false,
-          userType: 'Client',
-        };
-        return request(server)
-          .post('/auth/sign-up')
-          .send(signUpDto)
-          .expect(HttpStatus.BAD_REQUEST);
-      });
-    });
-
-    describe('POST /auth/login', () => {
-      it('should sign in the user and return access token', async () => {
-        const email = 'user@gmail.com';
-        const password = 'Rashid123';
-        await AuthInstanceFactory.new(dataSource).create({
-          email: 'user@gmail.com',
-          password: 'Rashid123',
-          name: 'Muhamad Rashid',
-          phoneNumber: '0705939222',
-          isDriverAvailable: false,
-          userType: 'Driver',
-        });
-
-        const signInDto: SignInDto = {
-          email,
-          password,
-        };
-
-        return request(server)
-          .post('/auth/login')
-          .send(signInDto)
-          .expect(HttpStatus.OK)
-          .expect((res) => {
-            expect(res.body.user).not.toHaveProperty('password');
-          });
-      });
-
-      it('should return 400 for invalid sign in fields', async () => {
-        const signInDto: SignInDto = {
-          email: 'atest@email.com',
-          password: '',
-        };
-
-        return request(server)
-          .post('/auth/login')
-          .send(signInDto)
-          .expect(HttpStatus.BAD_REQUEST);
-      });
-    });
-
-    // describe('POST /auth/sign-out', () => {
-    //   it('should sign out the user', async () => {
-    //     const user = await AuthInstanceFactory.new(dataSource).create({
-    //       email: 'atest@email.com',
-    //       password: 'Pass#123',
-    //     });
-
-    //     const { accessToken } = await authService.generateAccessToken(user);
-
-    //     return request(server)
-    //       .post('/auth/sign-out')
-    //       .set('Authorization', `Bearer ${accessToken}`)
-    //       .expect(HttpStatus.OK);
-    //   });
-
-    //   it('should return 401 if not authorized', async () => {
-    //     return request(server)
-    //       .post('/auth/sign-out')
-    //       .expect(HttpStatus.UNAUTHORIZED);
-    //   });
-    // });
-  });
-
-  describe('PATCH /toggle-available', () => {
-    let user;
-
+  describe('POST /requests/request-ride', () => {
+    let rideRequestData: RequestDto;
+    let token;
     beforeEach(async () => {
-      user = await AuthInstanceFactory.new(dataSource).create({
-        email: 'user@gmail.com',
-        password: 'Rashid123',
-        name: 'Muhamad Rashid',
-        phoneNumber: '0705939222',
-        isDriverAvailable: false,
-        userType: 'Customer',
-      });
+      rideRequestData = {
+        pickUpLocation: 'Nansana Ku Mastore',
+        destinationLocation: 'Kampala Min Price',
+        customer: user,
+        status: 'pending',
+      };
+
+      const { accessToken } = await authService.generateAccessToken(user);
+      token = accessToken;
     });
 
-    it('Customer or Admin should not access setting availability status', async () => {
-      const user1 = await AuthInstanceFactory.new(dataSource).create({
+    it('It should return 200 if customer requests for a ride', async () => {
+      return await request(server)
+        .post('/requests/request-ride')
+        .set('Authorization', `Bearer ${token}`)
+        .send(rideRequestData)
+        .expect(HttpStatus.CREATED);
+    });
+    it('should return 400 for invalid sign up fields', async () => {
+      rideRequestData.destinationLocation = null;
+
+      return await request(server)
+        .post('/requests/request-ride')
+        .set('Authorization', `Bearer ${token}`)
+        .send(rideRequestData)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('should deny access if user requesting a ride is not a customer', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      const driver = await AuthInstanceFactory.new(dataSource).create({
         email: 'user1@gmail.com',
         password: 'Rashid123',
         name: 'Muhamad Rashid',
         phoneNumber: '0705939222',
         isDriverAvailable: false,
-        userType: 'Customer',
+        userType: 'Driver',
       });
 
-      const { accessToken } = await authService.generateAccessToken(user);
+      const { accessToken } = await authService.generateAccessToken(driver);
 
-      return request(server)
-        .patch('/auth/toggle-available')
+      return await request(server)
+        .post('/requests/request-ride')
         .set('Authorization', `Bearer ${accessToken}`)
+        .send(rideRequestData)
         .expect(HttpStatus.FORBIDDEN);
     });
 
-    it('should return 401 if not authorized', async () => {
-      return request(server)
-        .patch('/auth/toggle-available')
+    it('should return 401 id user is not logged in', async () => {
+      return await request(server)
+        .post('/requests/request-ride')
+        .send(rideRequestData)
         .expect(HttpStatus.UNAUTHORIZED);
     });
+  });
 
-    it('should return 200 if the user is a driver', async () => {
+  describe('Get /requests/customer-requests', () => {
+    let rideRequestData: RequestDto;
+    let token;
+    beforeEach(async () => {
+      rideRequestData = {
+        pickUpLocation: 'Nansana Ku Mastore',
+        destinationLocation: 'Kampala Min Price',
+        customer: user,
+        status: 'pending',
+      };
+
       const user1 = await AuthInstanceFactory.new(dataSource).create({
         email: 'user1@gmail.com',
         password: 'Rashid123',
@@ -225,40 +128,125 @@ describe('Auth Module End-2-End', () => {
       });
 
       const { accessToken } = await authService.generateAccessToken(user1);
+      token = accessToken;
+    });
+
+    it('Should return ok for all active request', async () => {
       return request(server)
-        .patch('/auth/toggle-available')
-        .set('Authorization', `Bearer ${accessToken}`)
+        .get('/requests/customer-requests')
+        .set('Authorization', `Bearer ${token}`)
+        .send(rideRequestData)
         .expect(HttpStatus.OK);
+    });
+
+    it('Should not allow access for customer users', async () => {
+      const { accessToken } = await authService.generateAccessToken(user);
+      return request(server)
+        .get('/requests/customer-requests')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(rideRequestData)
+        .expect(HttpStatus.FORBIDDEN);
     });
   });
 
-  // describe('UsersModule', () => {
-  //   describe('GET /users/me', () => {
-  //     it('should return 401 unauthorized when no access token provided', () => {
-  //       return request(server).get('/users/me').expect(HttpStatus.UNAUTHORIZED);
-  //     });
+  describe('POST /requests/take-request/:requestId/', () => {
+    let rideRequestData: RequestDto;
+    let token;
+    beforeEach(async () => {
+      rideRequestData = {
+        pickUpLocation: 'Nansana Ku Mastore',
+        destinationLocation: 'Kampala Min Price',
+        customer: user,
+        status: 'pending',
+      };
 
-  //     it('should return user details when access token provided', async () => {
-  //       const user = await AuthInstanceFactory.new(dataSource).create({
-  //         email: 'atest@email.com',
-  //         password: 'Pass#123',
-  //       });
+      const user1 = await AuthInstanceFactory.new(dataSource).create({
+        email: 'user1@gmail.com',
+        password: 'Rashid123',
+        name: 'Muhamad Rashid',
+        phoneNumber: '0705939222',
+        isDriverAvailable: false,
+        userType: 'Driver',
+      });
 
-  //       const { accessToken } = await authService.generateAccessToken(user);
+      await RequestInstanceFactory.new(dataSource).create(rideRequestData);
 
-  //       return request(server)
-  //         .get('/users/me')
-  //         .set('Authorization', `Bearer ${accessToken}`)
-  //         .expect(HttpStatus.OK)
-  //         .expect((res) => {
-  //           expect(res.body).toEqual(
-  //             expect.objectContaining({
-  //               id: user.id,
-  //               email: user.email,
-  //             }),
-  //           );
-  //         });
-  //     });
-  //   });
-  // });
+      const { accessToken } = await authService.generateAccessToken(user1);
+      token = accessToken;
+    });
+
+    it("Should take a request if it's still available", async () => {
+      const rideRequest: Requests = await RequestInstanceFactory.new(
+        dataSource,
+      ).create(rideRequestData);
+
+      return request(server)
+        .post(`/requests/take-request/${rideRequest.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.CREATED);
+    });
+
+    it('should return 40o driver already has a ride on going', async () => {
+      const rideRequest: Requests = await RequestInstanceFactory.new(
+        dataSource,
+      ).create(rideRequestData);
+
+      await request(server)
+        .post(`/requests/take-request/${rideRequest.id}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      return request(server)
+        .post(`/requests/take-request/${rideRequest.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+  });
+
+  describe('PUT /requests/update-request/:requestId/:status', () => {
+    let user1;
+    let rideRequestData: RequestDto;
+    let token;
+    let res;
+
+    beforeEach(async () => {
+      user1 = await AuthInstanceFactory.new(dataSource).create({
+        email: 'user1@gmail.com',
+        password: 'Rashid123',
+        name: 'Muhamad Rashid',
+        phoneNumber: '0705939222',
+        isDriverAvailable: false,
+        userType: 'Driver',
+      });
+
+      rideRequestData = {
+        pickUpLocation: 'Nansana Ku Mastore',
+        destinationLocation: 'Kampala Min Price',
+        customer: user,
+        status: 'pending',
+      };
+
+      const { accessToken } = await authService.generateAccessToken(user);
+      token = accessToken;
+    });
+
+    it('Customer or Admin should not access setting availability status', async () => {
+      let res1 = await request(server)
+        .post('/requests/request-ride')
+        .set('Authorization', `Bearer ${token}`)
+        .send(rideRequestData);
+      console.log(res1.body.id);
+
+      const { accessToken } = await authService.generateAccessToken(user1);
+
+      await request(server)
+        .post(`/requests/take-request/${res1.body.id}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      const res = await request(server)
+        .put(`/requests/update-request/${res1.body.id}/accepted`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.status).toBe(200);
+    });
+  });
 });

@@ -18,7 +18,7 @@ export class RequestDto {
   })
   @MaxLength(255)
   @IsNotEmpty()
-  readonly destinationLocation: string;
+  destinationLocation: string;
 
   @ApiProperty({
     description: 'Customer requesting for a ride',

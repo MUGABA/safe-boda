@@ -26,7 +26,7 @@ describe('Auth Module End-2-End', () => {
     await app.close();
   });
 
-  beforeEach(async () => {
+  afterEach(async () => {
     await app.cleanupDB();
   });
 
@@ -152,28 +152,6 @@ describe('Auth Module End-2-End', () => {
           .expect(HttpStatus.BAD_REQUEST);
       });
     });
-
-    // describe('POST /auth/sign-out', () => {
-    //   it('should sign out the user', async () => {
-    //     const user = await AuthInstanceFactory.new(dataSource).create({
-    //       email: 'atest@email.com',
-    //       password: 'Pass#123',
-    //     });
-
-    //     const { accessToken } = await authService.generateAccessToken(user);
-
-    //     return request(server)
-    //       .post('/auth/sign-out')
-    //       .set('Authorization', `Bearer ${accessToken}`)
-    //       .expect(HttpStatus.OK);
-    //   });
-
-    //   it('should return 401 if not authorized', async () => {
-    //     return request(server)
-    //       .post('/auth/sign-out')
-    //       .expect(HttpStatus.UNAUTHORIZED);
-    //   });
-    // });
   });
 
   describe('PATCH /toggle-available', () => {
